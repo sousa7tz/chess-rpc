@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Chess.com Discord RPC",
+  "version": "1.0.0",
+  "description": "Displays your live Chess.com matches on Discord Rich Presence.",
+  "permissions": [],
+  "host_permissions": [
+    "*://*.chess.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.chess.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
