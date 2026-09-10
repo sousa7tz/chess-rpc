@@ -1,54 +1,90 @@
+const fs = require('fs');
+const path = require('path');
 const RPC = require('discord-rpc');
 const { WebSocketServer } = require('ws');
 require('dotenv').config();
 
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID || '1547222429691019314';
 const PORT = process.env.PORT || 3020;
-const rpc = new RPC.Client({ transport: 'ipc' });
 
+// Load config and dictionaries in /locales path
+function loadI18n() {
+  let lang = 'en';
+  try {
+    const configPath = path.join(__dirname, 'config.json');
+    if (fs.existsSync(configPath)) {
+      const cfg = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+      if (cfg.language) lang = cfg.language;
+    }
+  } catch (err) {
+    console.warn('⚠️ Could not parse config.json, defaulting to English.');
+  }
+
+  const localePath = path.join(__dirname, 'locales', `${lang}.json`);
+  const fallbackPath = path.join(__dirname, 'locales', 'en.json');
+
+  try {
+    if (fs.existsSync(localePath)) {
+      return JSON.parse(fs.readFileSync(localePath, 'utf-8'));
+    }
+    return JSON.parse(fs.readFileSync(fallbackPath, 'utf-8'));
+  } catch (err) {
+    console.error('❌ Failed to load locale file:', err.message);
+    return {
+      idleTitle: 'Idle on Chess.com',
+      idleState: 'Waiting for a match...',
+      playingVsBot: 'Playing vs Bot',
+      playingAs: 'Playing as',
+      yourTurn: 'Your turn to move',
+      opponentTurn: "Opponent's turn",
+      finished: 'Finished',
+      watchGame: 'Watch Game',
+      liveMatch: 'Live Match',
+      gameOver: 'Game Over'
+    };
+  }
+}
+
+const i18n = loadI18n();
+
+const rpc = new RPC.Client({ transport: 'ipc' });
 let isRpcReady = false;
 let gameOverResetTimer = null;
 
-// Função auxiliar para resetar pro estado Idle
 function setIdleActivity() {
   if (!isRpcReady) return;
   rpc.setActivity({
-    details: 'Idle on Chess.com',
-    state: 'Waiting for a match...',
+    details: i18n.idleTitle,
+    state: i18n.idleState,
     largeImageKey: 'logo',
     largeImageText: 'Chess.com',
     instance: false,
   }).catch(() => {});
 }
 
-// 1. Ao iniciar: NÃO seta atividade antes de a extensão conectar
 rpc.on('ready', () => {
-  console.log('✅ Connected to Discord successfully!');
+  console.log('✅ Connected to Discord RPC successfully.');
   isRpcReady = true;
 });
 
 rpc.login({ clientId: CLIENT_ID }).catch(console.error);
 
-// 2. Servidor WebSocket
 const wss = new WebSocketServer({ port: Number(PORT) });
-console.log(`🚀 Server waiting for data on port ${PORT}...`);
+console.log(`🚀 Daemon listening on port ${PORT}...`);
 
 wss.on('connection', (ws) => {
-  console.log('🔌 Extension connected!');
-  // Seta Idle assim que a aba do Chess.com abre
+  console.log('🔌 Extension connected.');
   setIdleActivity();
 
   ws.on('message', (data) => {
     try {
       const game = JSON.parse(data);
-
       if (!isRpcReady) return;
 
-      // Se a partida acabou
       if (game.isGameOver) {
         rpc.setActivity({
-          details: `Finished: ${game.opponent}`,
-          state: game.gameResult || 'Game Over',
+          details: `${i18n.finished}: ${game.opponent}`,
+          state: game.gameResult || i18n.gameOver,
           largeImageKey: 'logo',
           largeImageText: 'Chess.com',
           smallImageKey: game.opponentAvatar && game.opponentAvatar.startsWith('http') ? game.opponentAvatar : undefined,
@@ -56,35 +92,29 @@ wss.on('connection', (ws) => {
           instance: false,
         });
 
-        // Cancela timer anterior se houver
         if (gameOverResetTimer) clearTimeout(gameOverResetTimer);
-
-        // Após 15 segundos exibindo a tela de vitória/derrota, volta pro Idle
         gameOverResetTimer = setTimeout(() => {
-          console.log('⏳ Match screen timeout: returning to Idle...');
+          console.log('⏳ Match ended: resetting activity to idle...');
           setIdleActivity();
         }, 15000);
 
         return;
       }
 
-      // Se entrou em partida ativa, cancela qualquer reset pendente
       if (gameOverResetTimer) {
         clearTimeout(gameOverResetTimer);
         gameOverResetTimer = null;
       }
 
-      // Monta textos da partida ativa
       let detailsText = '';
-      if (game.mode === 'vs Computer') {
-        detailsText = `Playing vs Bot (${game.opponent})`;
+      if (game.isBot) {
+        detailsText = `${i18n.playingVsBot} (${game.opponent})`;
       } else {
         detailsText = `${game.mode} vs ${game.opponent}`;
       }
 
-      const stateText = game.turn 
-        ? `${game.turn} • Playing as ${game.color}`
-        : `Playing as ${game.color}`;
+      const turnText = game.isMyTurn ? i18n.yourTurn : i18n.opponentTurn;
+      const stateText = `${turnText} • ${i18n.playingAs} ${game.color}`;
 
       const activity = {
         details: detailsText,
@@ -101,19 +131,18 @@ wss.on('connection', (ws) => {
 
       if (game.gameUrl && game.gameUrl.includes('/game/live/')) {
         activity.buttons = [
-          { label: 'Watch Game', url: game.gameUrl }
+          { label: i18n.watchGame, url: game.gameUrl }
         ];
       }
 
       rpc.setActivity(activity);
     } catch (err) {
-      console.error('❌ Failed to parse data:', err.message);
+      console.error('❌ Error processing message:', err.message);
     }
   });
 
-  // Limpa completamente o Discord ao fechar a aba
   ws.on('close', () => {
-    console.log('🔌 Extension disconnected. Clearing Discord RPC...');
+    console.log('🔌 Extension disconnected. Clearing presence.');
     if (gameOverResetTimer) clearTimeout(gameOverResetTimer);
     if (isRpcReady) {
       rpc.clearActivity().catch(() => {});

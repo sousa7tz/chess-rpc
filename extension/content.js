@@ -1,47 +1,21 @@
 let socket = null;
-let reconnectTimer = null;
 let lastPayloadString = '';
 
-function connectWebSocket() {
-  socket = new WebSocket('ws://localhost:3020');
+function detectTimeMode(timeString) {
+  if (!timeString) return 'Live Match';
+  const parts = timeString.split(':');
+  if (parts.length < 2) return 'Live Match';
 
-  socket.onopen = () => {
-    console.log('[Chess-RPC] ✅ Conectado ao servidor local!');
-  };
-
-  socket.onclose = () => {
-    scheduleReconnect();
-  };
-
-  socket.onerror = () => {
-    socket.close();
-  };
-}
-
-function scheduleReconnect() {
-  if (reconnectTimer) clearTimeout(reconnectTimer);
-  reconnectTimer = setTimeout(connectWebSocket, 5000);
-}
-
-connectWebSocket();
-
-function detectTimeMode(initialTimeStr) {
-  if (!initialTimeStr) return 'Live Match';
-  if (initialTimeStr.startsWith('10:')) return 'Rapid (10 min)';
-  if (initialTimeStr.startsWith('15:')) return 'Rapid (15 min)';
-  if (initialTimeStr.startsWith('3:')) return 'Blitz (3 min)';
-  if (initialTimeStr.startsWith('5:')) return 'Blitz (5 min)';
-  if (initialTimeStr.startsWith('1:')) return 'Bullet (1 min)';
-  if (initialTimeStr.startsWith('0:')) return 'Bullet (1 min)';
-  return `Live (${initialTimeStr})`;
+  const minutes = parseInt(parts[0], 10);
+  if (minutes < 3) return 'Bullet';
+  if (minutes < 10) return 'Blitz';
+  return 'Rapid';
 }
 
 function scrapeGameData() {
   if (!socket || socket.readyState !== WebSocket.OPEN) return;
 
   const board = document.querySelector('wc-chess-board');
-  
-  // Se não há tabuleiro na tela (ex: navegando pelo menu/home), não manda jogo ativo
   if (!board) return;
 
   const gameOverModal = document.querySelector('.game-over-modal-shell-container');
@@ -53,13 +27,13 @@ function scrapeGameData() {
     const titleEl = gameOverModal.querySelector('.game-over-modal-title-component');
     const subtitleEl = gameOverModal.querySelector('.game-over-modal-subtitle-component');
 
-    const title = titleEl ? titleEl.innerText.trim() : 'Game Over';
+    const title = titleEl ? titleEl.innerText.trim() : '';
     const subtitle = subtitleEl ? subtitleEl.innerText.trim() : '';
     gameResult = subtitle ? `${title} (${subtitle})` : title;
   }
 
-  const topPlayer = 
-    document.querySelector('.board-layout-top') || 
+  const topPlayer =
+    document.querySelector('.board-layout-top') ||
     document.querySelector('#board-layout-player-top');
 
   let opponentName = 'Opponent';
@@ -81,31 +55,27 @@ function scrapeGameData() {
 
   const myClock = document.querySelector('.clock-bottom');
   let myTime = '';
-  let turnText = '';
+  let isMyTurn = false;
 
   if (myClock) {
     const timeEl = myClock.querySelector('.clock-time-monospace');
     if (timeEl) myTime = timeEl.innerText.trim();
-    const isMyTurn = myClock.classList.contains('clock-player-turn');
-    turnText = isMyTurn ? 'Your turn to move' : "Opponent's turn";
+    isMyTurn = myClock.classList.contains('clock-player-turn');
   }
 
-  let gameMode = 'Live Match';
-  if (window.location.pathname.includes('/computer')) {
-    gameMode = 'vs Computer';
-  } else {
-    gameMode = detectTimeMode(myTime);
-  }
+  const isBot = window.location.pathname.includes('/computer');
+  const mode = isBot ? 'vs Computer' : detectTimeMode(myTime);
 
   const payload = {
-    isGameOver: isGameOver,
-    gameResult: gameResult,
-    mode: gameMode,
+    isGameOver,
+    gameResult,
+    isBot,
+    mode,
     opponent: opponentRating ? `${opponentName} ${opponentRating}` : opponentName,
     color: myColor,
-    turn: turnText,
-    opponentAvatar: opponentAvatar,
-    gameUrl: window.location.href
+    isMyTurn,
+    opponentAvatar,
+    gameUrl: window.location.href,
   };
 
   const currentPayloadString = JSON.stringify(payload);
@@ -115,4 +85,21 @@ function scrapeGameData() {
   }
 }
 
-setInterval(scrapeGameData, 1500);
+function connect() {
+  socket = new WebSocket('ws://localhost:3020');
+
+  socket.onopen = () => {
+    lastPayloadString = '';
+  };
+
+  socket.onclose = () => {
+    setTimeout(connect, 3000);
+  };
+
+  socket.onerror = () => {
+    socket.close();
+  };
+}
+
+connect();
+setInterval(scrapeGameData, 1000);
