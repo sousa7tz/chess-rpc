@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build:exe": "bun build ./server.js --compile --outfile dist/chess-rpc.exe && xcopy /E /I /Y locales dist\\locales && copy /Y config.json dist\\"
+    "build:exe": "bun build ./server.js --compile --outfile dist/chess-rpc.exe && xcopy /E /I /Y locales dist\\locales && copy /Y config.json dist\\",
+    "build:installer": "cmd /c \"\"%LOCALAPPDATA%\\Programs\\Inno Setup 6\\ISCC.exe\" installer.iss\"",
+    "build": "npm run build:exe && npm run build:installer"
   },
   "repository": {
     "type": "git",
