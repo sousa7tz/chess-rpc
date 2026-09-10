@@ -2,16 +2,17 @@
   "name": "chess-rpc",
   "version": "1.0.0",
   "description": "Real-time Chess.com Rich Presence integration for Discord.",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "build:exe": "bun build ./server.js --compile --outfile dist/chess-rpc.exe && xcopy /E /I /Y locales dist\\locales && copy /Y config.json dist\\"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sousa7tz/chess-rpc.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "sousa7tz",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
@@ -22,5 +23,8 @@
     "discord-rpc": "^4.0.1",
     "dotenv": "^17.4.2",
     "ws": "^8.21.3"
+  },
+  "devDependencies": {
+    "@yao-pkg/pkg": "^6.22.0"
   }
 }
