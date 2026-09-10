@@ -40,7 +40,9 @@ function loadI18n() {
       finished: 'Finished',
       watchGame: 'Watch Game',
       liveMatch: 'Live Match',
-      gameOver: 'Game Over'
+      gameOver: 'Game Over',
+      white: 'White',
+      black: 'Black',
     };
   }
 }
@@ -113,8 +115,15 @@ wss.on('connection', (ws) => {
         detailsText = `${game.mode} vs ${game.opponent}`;
       }
 
+      // Localização da cor com fallback
+      const localizedColor = game.color === 'Black' 
+        ? (i18n.black || 'Black') 
+        : (i18n.white || 'White');
+
+      // Turno + tempo restante no formato [MM:SS]
+      const clockText = game.myTime ? ` [${game.myTime}]` : '';
       const turnText = game.isMyTurn ? i18n.yourTurn : i18n.opponentTurn;
-      const stateText = `${turnText} • ${i18n.playingAs} ${game.color}`;
+      const stateText = `${turnText}${clockText} • ${i18n.playingAs} ${localizedColor}`;
 
       const activity = {
         details: detailsText,

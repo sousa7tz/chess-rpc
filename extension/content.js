@@ -73,6 +73,7 @@ function scrapeGameData() {
     mode,
     opponent: opponentRating ? `${opponentName} ${opponentRating}` : opponentName,
     color: myColor,
+    myTime,
     isMyTurn,
     opponentAvatar,
     gameUrl: window.location.href,
