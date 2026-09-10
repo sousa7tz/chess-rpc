@@ -1,118 +1,112 @@
-# Chess.com Discord Rich Presence
-
 <div align="center">
-  <img src="https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white" alt="Node.js 18+" />
-  <img src="https://img.shields.io/badge/Chrome%20Extension-Manifest%20V3-4285F4?logo=googlechrome&logoColor=white" alt="Chrome Extension Manifest V3" />
-  <img src="https://img.shields.io/badge/Discord-RPC-5865F2?logo=discord&logoColor=white" alt="Discord RPC" />
-  <img src="https://img.shields.io/badge/License-MIT-green" alt="MIT License" />
-  <img src="https://img.shields.io/badge/Contributions-Welcome-brightgreen" alt="Contributions Welcome" />
+<h1>♟️ Discord Rich Presence for Chess.com</h1>
+  <a href="https://github.com/sousa7tz/chess-rpc/releases/latest">
+    <img src="https://img.shields.io/github/v/release/sousa7tz/chess-rpc?style=for-the-badge&color=2ea44f&logo=github" alt="Latest Release" />
+  </a>
+  <img src="https://img.shields.io/badge/Platform-Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Windows Support" />
+  <img src="https://img.shields.io/badge/Runtime-Bun-f472b6?style=for-the-badge&logo=bun&logoColor=white" alt="Bun Compiled" />
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="MIT License" />
 </div>
 
 <p align="center">
-  <strong>Live Chess.com matches, clean Discord status, no heavy setup.</strong>
+  <strong>Display your live Chess.com matches seamlessly on Discord with zero terminal clutter.</strong>
 </p>
 
-A lightweight open-source bridge that turns your live Chess.com activity into a polished Discord Rich Presence. It is designed to be simple, modular, and fast: a small Chrome extension captures the board state, a local WebSocket daemon forwards it, and the Node.js server pushes the activity to Discord without adding heavy browser or desktop dependencies.
-
-## Why this project stands out
-
-- Lightweight and focused: no bulky desktop app or complex runtime
-- Modular architecture: browser-side scraping + local daemon + Discord IPC
-- Clean presence updates: automatic idle reset, live match clock, and direct watch links
-- Easy to localize: built-in i18n support for 10 languages
+A lightweight, zero-configuration bridge connecting live Chess.com gameplay directly to Discord Rich Presence. It extracts the game state directly from your browser and pipes it through a stealth background daemon compiled into a single native binary.
 
 ---
 
-## Features
+## ✨ Key Highlights
 
-- 🔴 Real-time match tracking: opponent name, rating, and mode detection for Bullet, Blitz, Rapid, and vs Bot matches
-- ⏱️ Dynamic clock display: shows the current move clock as `[MM:SS]` and keeps the match elapsed time in Discord with `startTimestamp`
-- 🧑‍🤝‍🧑 Dynamic opponent avatar: uses the opponent avatar from the Chess.com DOM as the small presence image
-- 🎯 Interactive watch button: adds a direct button to `gameUrl` when the page is a live match (`/game/live/`)
-- 🌍 Native i18n support: 10 languages are available and configurable through `config.json`
-- 🧹 Smart idle cleanup: automatically clears the Rich Presence when a match ends or the extension disconnects
+- **Automated Windows Setup:** One-click installer with automatic silent boot on Windows startup.
+- **Zero Terminal Footprint:** Runs in the background via Windows Script Host—no open CMD windows.
+- **Low Resource Usage:** Binary compiled natively with **Bun**, running quietly without heavy runtimes.
+- **Real-time Game Tracking:** Displays active clock `[MM:SS]`, current mode (Blitz, Bullet, Rapid, Bots), match turn, and side.
+- **Direct Spectate Action:** Renders a direct Discord button leading viewers straight to the live match.
+- **Multi-language Support:** Native i18n support across 10 locales configurable via JSON.
 
 ---
 
-## Project architecture
+## 🏗️ Architecture
 
 ```text
-Chess.com DOM
-    │
-    ▼
-Chrome Extension
-  extension/content.js
-    │
-    │  WebSocket client
-    ▼
-ws://localhost:3020
-    │
-    ▼
-Node.js daemon
-  server.js
-    │
-    │  Discord IPC socket
-    ▼
+Chess.com Live Match (DOM)
+          │
+          ▼
+Chrome Extension (Manifest V3)
+  └─ content.js (WebSocket Client)
+          │
+          │  ws://localhost:3020
+          ▼
+Native Stealth Daemon
+  ├─ start-hidden.vbs (Silent Launcher)
+  └─ chess-rpc.exe (Bun Binary)
+          │
+          │  Discord IPC Socket
+          ▼
 Discord Rich Presence
 ```
 
-The flow is intentionally simple:
+---
 
-1. The content script inspects the live Chess.com page.
-2. It extracts state such as opponent, clock, color, bot status, and match URL.
-3. It sends a JSON payload through a local WebSocket to the Node.js server.
-4. The server translates that payload into a Discord activity and updates the presence in real time.
+## 📦 Quick Installation (End Users)
+
+### 1. Install the Windows Daemon
+
+1. Download **`ChessRPC-Setup-1.0.0.exe`** from the [Latest Release](https://github.com/sousa7tz/chess-rpc/releases/latest).
+2. Run the setup wizard and ensure **"Start automatically with Windows"** is selected.
+
+### 2. Install the Browser Extension
+
+1. Download **`extension.zip`** from the [Latest Release](https://github.com/sousa7tz/chess-rpc/releases/latest) and extract it.
+2. In Chrome, Brave, Edge, or Opera, go to `chrome://extensions/`.
+3. Enable **Developer mode** (top-right corner).
+4. Click **Load unpacked** and select the unzipped `extension/` folder.
+5. Open [Chess.com](https://www.chess.com) and start a match.
 
 ---
 
-## Installation and local setup
+## 🛠️ Developer Setup & Pipeline
 
 ### Prerequisites
 
-- Node.js 18+
-- Discord desktop app open and signed in
-- Chrome with Developer Mode enabled
+- Node.js 18+ or Bun
+- Inno Setup 6 (for compiling the installer)
+- Discord Desktop Client running locally
 
-### 1) Clone and install dependencies
+### Local Development
 
 ```bash
+# Clone the repository
 git clone https://github.com/sousa7tz/chess-rpc.git
 cd chess-rpc
+
+# Install dependencies
 npm install
+
+# Run development server
+npm start
 ```
 
-### 2) Load the extension in Chrome
+### Full Production Build Pipeline
 
-1. Open `chrome://extensions`
-2. Enable Developer Mode
-3. Click Load unpacked
-4. Select the `extension/` folder from this repository
-
-### 3) Start the daemon
+The build pipeline terminates stale processes, compiles the standalone native binary via Bun, mirrors localized assets, and generates the Inno Setup executable installer:
 
 ```bash
-node server.js
+npm run build
 ```
 
-> The project currently runs the daemon directly with Node.js. The server listens on `ws://localhost:3020` and connects to Discord via the native IPC socket provided by `discord-rpc`.
+The installer will be generated at:
 
-### 4) Open Chess.com and play
-
-Once the daemon is running and the extension is loaded, visit a Chess.com live game page and the Discord presence will update automatically.
+```text
+build-installer/ChessRPC-Setup-1.0.0.exe
+```
 
 ---
 
-## Language configuration (i18n)
+## 🌍 Localization (i18n)
 
-The project reads the active language from `config.json` at startup.
-
-```json
-{
-  "language": "pt"
-}
-```
-
-Examples:
+Modify the active language in `config.json`:
 
 ```json
 {
@@ -120,108 +114,47 @@ Examples:
 }
 ```
 
-```json
-{
-  "language": "pt"
-}
-```
+### Supported Locales
 
-### Supported locales
-
-The repository includes the following language files under `locales/`:
-
-| Language | ISO tag |
-| --- | --- |
-| English | `en` |
-| Portuguese | `pt` |
-| Spanish | `es` |
-| Russian | `ru` |
-| French | `fr` |
-| German | `de` |
-| Hindi | `hi` |
-| Turkish | `tr` |
-| Polish | `pl` |
-| Japanese | `ja` |
+| Language | Tag | Language | Tag |
+| --- | --- | --- | --- |
+| **English** | `en` | **German** | `de` |
+| **Portuguese** | `pt` | **Hindi** | `hi` |
+| **Spanish** | `es` | **Turkish** | `tr` |
+| **French** | `fr` | **Polish** | `pl` |
+| **Russian** | `ru` | **Japanese** | `ja` |
 
 ---
 
-## Directory structure
+## 📂 Project Structure
 
 ```text
 chess-rpc/
-├── extension/
-│   ├── content.js
-│   └── manifest.json
-├── locales/
-│   ├── de.json
-│   ├── en.json
-│   ├── es.json
-│   ├── fr.json
-│   ├── hi.json
-│   ├── ja.json
-│   ├── pl.json
-│   ├── pt.json
-│   ├── ru.json
-│   └── tr.json
-├── config.json
-├── LICENSE
-├── package.json
-├── README.md
-├── server.js
-└── .gitignore
+├── assets/             # Project branding & icons
+├── build-installer/    # Output directory for generated setup binaries (ignored)
+├── dist/               # Compiled standalone binary and staging files
+│   ├── locales/        # Bundled localization dictionaries
+│   ├── chess-rpc.exe   # Compiled binary daemon
+│   ├── config.json     # Configuration file
+│   └── start-hidden.vbs # Stealth Windows launcher
+├── extension/          # Manifest V3 browser extension
+│   ├── content.js      # DOM scraper & WebSocket dispatch
+│   └── manifest.json   # Extension manifest
+├── locales/            # Raw JSON translation strings
+├── config.json         # Base application config
+├── installer.iss       # Inno Setup build recipe
+├── package.json        # Project metadata & build scripts
+└── server.js           # Core IPC/WebSocket bridge logic
 ```
 
 ---
 
-## Tech stack
+## ⚠️ Disclaimer
 
-- JavaScript
-- Node.js
-- `discord-rpc`
-- `ws` (WebSocket server/client)
-- Chrome Extensions Manifest V3
+This is an unofficial open-source utility and is not affiliated with, associated with, authorized by, endorsed by, or officially connected with Chess.com or Discord Inc.
 
 ---
 
-## Roadmap and packaging
+## 📄 License
 
-This project is intentionally lightweight, but the repository is already aligned with a future standalone distribution path.
-
-Planned enhancement:
-
-- Package the daemon as a native Windows executable using Inno Setup or a similar installer workflow
-- Bundle the local runtime and startup flow for easier non-developer installation
-- Improve UX around automatic launch and configuration for end users
-
----
-
-## Contributing
-
-Contributions are welcome. If you want to improve the project, please:
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Open a pull request with a clear description
-
-Potential areas for contribution include translation quality, richer presence states, match detection improvements, and packaging improvements.
-
----
-
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
----
-
-## Quick facts
-
-| Item | Details |
-| --- | --- |
-| Project type | Chrome extension + local Node.js daemon |
-| Local transport | WebSocket on `ws://localhost:3020` |
-| Discord integration | Discord Rich Presence via `discord-rpc` |
-| Supported domains | `*.chess.com/*` |
-| Default locale | `en` |
-| License | MIT |
-
+Distributed under the **MIT License**. See [LICENSE](LICENSE) for full details.
