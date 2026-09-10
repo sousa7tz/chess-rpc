@@ -1,0 +1,14 @@
+{
+  "idleTitle": "Inativo no Chess.com",
+  "idleState": "Aguardando uma partida...",
+  "playingVsBot": "Jogando contra o Bot",
+  "playingAs": "Jogando como",
+  "yourTurn": "Sua vez de jogar",
+  "opponentTurn": "Vez do oponente",
+  "finished": "Finalizado",
+  "watchGame": "Assistir partida",
+  "liveMatch": "Partida ao vivo",
+  "gameOver": "Fim de partida",
+  "white": "Brancas",
+  "black": "Pretas"
+}

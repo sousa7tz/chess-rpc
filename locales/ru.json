@@ -1,0 +1,14 @@
+{
+  "idleTitle": "Ожидание в Chess.com",
+  "idleState": "Ожидание матча...",
+  "playingVsBot": "Игра против бота",
+  "playingAs": "Играет как",
+  "yourTurn": "Ваш ход",
+  "opponentTurn": "Ход соперника",
+  "finished": "Завершено",
+  "watchGame": "Смотреть игру",
+  "liveMatch": "Прямая трансляция",
+  "gameOver": "Игра окончена",
+  "white": "Белые",
+  "black": "Черные"
+}

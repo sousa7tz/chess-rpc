@@ -1,0 +1,14 @@
+{
+  "idleTitle": "Inactivo en Chess.com",
+  "idleState": "Esperando una partida...",
+  "playingVsBot": "Jugando contra el bot",
+  "playingAs": "Jugando como",
+  "yourTurn": "Tu turno para mover",
+  "opponentTurn": "Turno del oponente",
+  "finished": "Finalizado",
+  "watchGame": "Ver partida",
+  "liveMatch": "Partida en vivo",
+  "gameOver": "Fin de la partida",
+  "white": "Blancas",
+  "black": "Negras"
+}

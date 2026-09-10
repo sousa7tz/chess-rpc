@@ -1,0 +1,14 @@
+{
+  "idleTitle": "Idle on Chess.com",
+  "idleState": "Waiting for a match...",
+  "playingVsBot": "Playing vs Bot",
+  "playingAs": "Playing as",
+  "yourTurn": "Your turn to move",
+  "opponentTurn": "Opponent's turn",
+  "finished": "Finished",
+  "watchGame": "Watch Game",
+  "liveMatch": "Live Match",
+  "gameOver": "Game Over",
+  "white": "White",
+  "black": "Black"
+}

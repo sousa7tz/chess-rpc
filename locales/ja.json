@@ -1,0 +1,14 @@
+{
+  "idleTitle": "Chess.comで待機中",
+  "idleState": "対戦相手を待っています...",
+  "playingVsBot": "ボットと対戦中",
+  "playingAs": "として対戦中",
+  "yourTurn": "あなたの手番です",
+  "opponentTurn": "相手の手番",
+  "finished": "終了",
+  "watchGame": "対局を観戦",
+  "liveMatch": "ライブ対局",
+  "gameOver": "ゲームオーバー",
+  "white": "白",
+  "black": "黒"
+}

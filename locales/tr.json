@@ -1,0 +1,14 @@
+{
+  "idleTitle": "Chess.com'da Boşta",
+  "idleState": "Bir maç bekleniyor...",
+  "playingVsBot": "Bot'a karşı oynanıyor",
+  "playingAs": "Şu isimle oynanıyor",
+  "yourTurn": "Hamle sırası sende",
+  "opponentTurn": "Rakibin sırası",
+  "finished": "Tamamlandı",
+  "watchGame": "Oyunu İzle",
+  "liveMatch": "Canlı Maç",
+  "gameOver": "Oyun Bitti",
+  "white": "Beyaz",
+  "black": "Siyah"
+}

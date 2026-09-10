@@ -1,0 +1,14 @@
+{
+  "idleTitle": "Chess.com पर निष्क्रिय",
+  "idleState": "मैच का इंतज़ार...",
+  "playingVsBot": "बॉट के खिलाफ खेल रहे हैं",
+  "playingAs": "के रूप में खेल रहे हैं",
+  "yourTurn": "आपका चाल चलने का समय",
+  "opponentTurn": "प्रतिद्वंद्वी की चाल",
+  "finished": "समाप्त",
+  "watchGame": "गेम देखें",
+  "liveMatch": "लाइव मैच",
+  "gameOver": "खेल समाप्त",
+  "white": "सफेद",
+  "black": "काले"
+}
