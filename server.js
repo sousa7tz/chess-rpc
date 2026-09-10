@@ -7,11 +7,13 @@ require('dotenv').config();
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID || '1547222429691019314';
 const PORT = process.env.PORT || 3020;
 
-// Load config and dictionaries in /locales path
+// Load config and dictionaries dynamically (supports both raw node and packaged .exe)
 function loadI18n() {
+  const basePath = process.pkg ? path.dirname(process.execPath) : __dirname;
   let lang = 'en';
+
   try {
-    const configPath = path.join(__dirname, 'config.json');
+    const configPath = path.join(basePath, 'config.json');
     if (fs.existsSync(configPath)) {
       const cfg = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
       if (cfg.language) lang = cfg.language;
@@ -20,8 +22,8 @@ function loadI18n() {
     console.warn('⚠️ Could not parse config.json, defaulting to English.');
   }
 
-  const localePath = path.join(__dirname, 'locales', `${lang}.json`);
-  const fallbackPath = path.join(__dirname, 'locales', 'en.json');
+  const localePath = path.join(basePath, 'locales', `${lang}.json`);
+  const fallbackPath = path.join(basePath, 'locales', 'en.json');
 
   try {
     if (fs.existsSync(localePath)) {
