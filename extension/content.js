@@ -40,9 +40,10 @@ function scrapeGameData() {
   if (!socket || socket.readyState !== WebSocket.OPEN) return;
 
   const board = document.querySelector('wc-chess-board');
+  
+  // Se não há tabuleiro na tela (ex: navegando pelo menu/home), não manda jogo ativo
   if (!board) return;
 
-  // 1. Detectar Fim de Jogo pelo Modal
   const gameOverModal = document.querySelector('.game-over-modal-shell-container');
   let isGameOver = false;
   let gameResult = '';
@@ -57,7 +58,6 @@ function scrapeGameData() {
     gameResult = subtitle ? `${title} (${subtitle})` : title;
   }
 
-  // 2. Dados do Adversário (topo)
   const topPlayer = 
     document.querySelector('.board-layout-top') || 
     document.querySelector('#board-layout-player-top');
@@ -76,11 +76,9 @@ function scrapeGameData() {
     if (avatarEl && avatarEl.src) opponentAvatar = avatarEl.src;
   }
 
-  // 3. Cor do Tabuleiro
   const isBlack = board.classList.contains('flipped');
   const myColor = isBlack ? 'Black' : 'White';
 
-  // 4. Relógio e Turno
   const myClock = document.querySelector('.clock-bottom');
   let myTime = '';
   let turnText = '';
@@ -92,7 +90,6 @@ function scrapeGameData() {
     turnText = isMyTurn ? 'Your turn to move' : "Opponent's turn";
   }
 
-  // 5. Modo de Jogo
   let gameMode = 'Live Match';
   if (window.location.pathname.includes('/computer')) {
     gameMode = 'vs Computer';
