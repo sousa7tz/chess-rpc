@@ -52,9 +52,11 @@ const i18n = loadI18n();
 const rpc = new RPC.Client({ transport: 'ipc' });
 let isRpcReady = false;
 let gameOverResetTimer = null;
+let matchStartTime = null;
 
 function setIdleActivity() {
   if (!isRpcReady) return;
+  matchStartTime = null; 
   rpc.setActivity({
     details: i18n.idleTitle,
     state: i18n.idleState,
@@ -84,6 +86,8 @@ wss.on('connection', (ws) => {
       if (!isRpcReady) return;
 
       if (game.isGameOver) {
+        matchStartTime = null;
+
         rpc.setActivity({
           details: `${i18n.finished}: ${game.opponent}`,
           state: game.gameResult || i18n.gameOver,
@@ -108,6 +112,11 @@ wss.on('connection', (ws) => {
         gameOverResetTimer = null;
       }
 
+      // game timestamp init
+      if (!matchStartTime) {
+        matchStartTime = Date.now();
+      }
+
       let detailsText = '';
       if (game.isBot) {
         detailsText = `${i18n.playingVsBot} (${game.opponent})`;
@@ -115,12 +124,10 @@ wss.on('connection', (ws) => {
         detailsText = `${game.mode} vs ${game.opponent}`;
       }
 
-      // Localização da cor com fallback
       const localizedColor = game.color === 'Black' 
         ? (i18n.black || 'Black') 
         : (i18n.white || 'White');
 
-      // Turno + tempo restante no formato [MM:SS]
       const clockText = game.myTime ? ` [${game.myTime}]` : '';
       const turnText = game.isMyTurn ? i18n.yourTurn : i18n.opponentTurn;
       const stateText = `${turnText}${clockText} • ${i18n.playingAs} ${localizedColor}`;
@@ -128,6 +135,7 @@ wss.on('connection', (ws) => {
       const activity = {
         details: detailsText,
         state: stateText,
+        startTimestamp: matchStartTime, // Cronômetro nativo do Discord: "02:14 decorrido"
         largeImageKey: 'logo',
         largeImageText: 'Chess.com',
         instance: false,
@@ -152,6 +160,7 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     console.log('🔌 Extension disconnected. Clearing presence.');
+    matchStartTime = null;
     if (gameOverResetTimer) clearTimeout(gameOverResetTimer);
     if (isRpcReady) {
       rpc.clearActivity().catch(() => {});
